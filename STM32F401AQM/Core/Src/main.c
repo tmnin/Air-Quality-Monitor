@@ -77,8 +77,7 @@ PUTCHAR_PROTOTYPE
 
 // Data type to hold DHT11 readings
 // From DHT library
-DHT_DataTypedef DHT11_Data;
-
+DHT_DataTypedef DHT_Data;
 
 
 /* USER CODE END 0 */
@@ -99,7 +98,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -116,21 +114,46 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start(&htim10);
 
-  uint16_t timerCount = 0;
+  uint16_t timerCount = __HAL_TIM_GET_COUNTER(&htim10);
+
+  // Adjustable humidity bounds, hmdUpper must always be greater than hmdLower
+  // (or it will never turn green)
+  float hmdUpper = 60.00;
+  float hmdLower = 50.00;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  // if 2 seconds has passed
+	  // with 8400 prescaler, timer ticks at rate of 84 MHz/ 8400 = 10 kHz
+	  // 10 kHz = 10000 ticks per second
+	  // at 20000 ticks we get 2 seconds
+	  if((__HAL_TIM_GET_COUNTER(&htim10) - timerCount) >= 20000)
+	  {
+			DHT_GetData(&DHT_Data);
+			printf("%f\n", DHT_Data.Temperature);
+			printf("%f\n", DHT_Data.Humidity);
+			// update LCD
+			/*
+			 LCD UPDATE CODE BELOW
+			 */
+			/*
+			 END LCD UPDATE CODE
+			 */
+	  }
 
 
+	  // Testing code
+	  /*
 	  HAL_GPIO_TogglePin(AQM_Red_GPIO_Port, AQM_Red_Pin);
 	  HAL_GPIO_TogglePin(AQM_Green_GPIO_Port, AQM_Green_Pin);
-	  DHT_GetData(&DHT11_Data);
-	  printf("%f\n", DHT11_Data.Temperature);
-	  printf("%f\n", DHT11_Data.Humidity);
-	  HAL_Delay(2500);
+	  DHT_GetData(&DHT_Data);
+	  printf("%f\n", DHT_Data.Temperature);
+	  printf("%f\n", DHT_Data.Humidity);
+	  HAL_Delay(4000);
+	  */
 
     /* USER CODE END WHILE */
 
@@ -201,9 +224,9 @@ static void MX_TIM10_Init(void)
 
   /* USER CODE END TIM10_Init 1 */
   htim10.Instance = TIM10;
-  htim10.Init.Prescaler = 84 - 1;
+  htim10.Init.Prescaler = 8400-1;
   htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim10.Init.Period = 65535;
+  htim10.Init.Period = 20000;
   htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
