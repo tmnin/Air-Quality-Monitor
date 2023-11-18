@@ -142,6 +142,39 @@ int main(void)
 			/*
 			 END LCD UPDATE CODE
 			 */
+			// change LEDs as necessary
+			// within good bounds
+			if((DHT_Data.Humidity >= hmdLower) && (DHT_Data.Humidity <= hmdUpper))
+			{
+				// Green LED on, Red off
+				// if green off
+				if(!HAL_GPIO_ReadPin(AQM_Green_GPIO_Port, AQM_Green_Pin))
+				{
+					// turn green on
+					HAL_GPIO_TogglePin(AQM_Green_GPIO_Port, AQM_Green_Pin);
+				}
+				// if red on
+				if(HAL_GPIO_ReadPin(AQM_Red_GPIO_Port, AQM_Red_Pin))
+				{
+					// turn red off
+					HAL_GPIO_TogglePin(AQM_Red_GPIO_Port, AQM_Red_Pin);
+				}
+			}
+			// outside of good bounds
+			else
+			{
+				// if green on
+				if(HAL_GPIO_ReadPin(AQM_Green_GPIO_Port, AQM_Green_Pin))
+				{
+					HAL_GPIO_TogglePin(AQM_Green_GPIO_Port, AQM_Green_Pin);
+				}
+				// if red off
+				if(!HAL_GPIO_ReadPin(AQM_Red_GPIO_Port, AQM_Red_Pin))
+				{
+					HAL_GPIO_TogglePin(AQM_Red_GPIO_Port, AQM_Red_Pin);
+				}
+			}
+			timerCount = __HAL_TIM_GET_COUNTER(&htim10);
 	  }
 
 
