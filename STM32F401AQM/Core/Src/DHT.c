@@ -4,7 +4,7 @@
 #include "stm32f4xx_hal.h"
 
 #define TYPE_DHT11
-
+//#define TYPE_DHT22
 
 #define DHT_PORT GPIOC
 #define DHT_PIN GPIO_PIN_0
@@ -91,18 +91,18 @@ void DHT_Start (void)
 #endif
 
 #if defined(TYPE_DHT22)
-	delay (1200);  // >1ms delay
+	delay (2000);  // >1ms delay
 #endif
 
     HAL_GPIO_WritePin (DHT_PORT, DHT_PIN, 1);   // pull the pin high
-    delay (20);   // wait for 30us
+    delay (30);   // wait for 30us
 	Set_Pin_Input(DHT_PORT, DHT_PIN);    // set as input
 }
 
 uint8_t DHT_Check_Response (void)
 {
 	uint8_t Response = 0;
-	delay (40);
+	delay (80);
 	if (!(HAL_GPIO_ReadPin (DHT_PORT, DHT_PIN)))
 	{
 		delay (80);
@@ -153,7 +153,14 @@ void DHT_GetData (DHT_DataTypedef *DHT_Data)
 		#if defined(TYPE_DHT22)
 			DHT_Data->Temperature = ((Temp_byte1<<8)|Temp_byte2);
 			DHT_Data->Humidity = ((Rh_byte1<<8)|Rh_byte2);
+			DHT_Data->Temperature = DHT_Data->Temperature/10.0f;
+			DHT_Data->Humidity = DHT_Data->Humidity/10.0f;
 		#endif
+	}
+	else
+	{
+		DHT_Data->Temperature = 321;
+		DHT_Data->Humidity = 321;
 	}
 }
 
