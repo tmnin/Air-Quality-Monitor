@@ -116,6 +116,12 @@ int main(void)
 
   uint16_t timerCount = __HAL_TIM_GET_COUNTER(&htim10);
 
+   Lcd_PortType ports[] = { GPIOC, GPIOB, GPIOA, GPIOA };
+   Lcd_PinType pins[] = {GPIO_PIN_7, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_6};
+   Lcd_HandleTypeDef lcd;
+   // Lcd_create(ports, pins, RS_GPIO_Port, RS_Pin, EN_GPIO_Port, EN_Pin, LCD_4_BIT_MODE);
+   lcd = Lcd_create(ports, pins, GPIOB, GPIO_PIN_5, GPIOB, GPIO_PIN_4, LCD_4_BIT_MODE);
+
   // Adjustable humidity bounds, hmdUpper must always be greater than hmdLower
   // (or it will never turn green)
   float hmdUpper = 60.00;
@@ -139,6 +145,19 @@ int main(void)
 			/*
 			 LCD UPDATE CODE BELOW
 			 */
+		        Lcd_cursor(&lcd, 0, 1);
+	  	 	Lcd_string(&lcd, "Temp: ");
+	  	        // Convert temperature to string and display
+             		char tempStr[10];
+	  	        sprintf(tempStr, "%.2f", DHT_Data.Temperature);
+	  	        Lcd_string(&lcd, tempStr);
+
+	  	 	Lcd_cursor(&lcd, 1, 1);
+	  	 	Lcd_string(&lcd, "RH: ");
+	  	 	// Convert humidity to string and display
+	  	 	char humidityStr[10];
+	  	 	sprintf(humidityStr, "%.2f", DHT_Data.Humidity);
+	  	 	Lcd_string(&lcd, humidityStr);
 			/*
 			 END LCD UPDATE CODE
 			 */
